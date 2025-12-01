@@ -1,0 +1,40 @@
+
+{% extends "base.html" %} 
+{% block content %} 
+<div class="row justify-content-center"> 
+    <div class="col-lg-6"> 
+        <div class="d-flex align-items-center mb-3"> 
+            <a href="{{ url_for('operator_dashboard') }}" class="btn btn-outline-secondary me-3 rounded-circle" style="width:40px;height:40px;padding:0;line-height:38px;"><i class="fa-solid fa-arrow-left"></i></a> 
+            <h4 class="fw-bold m-0">Coil Configuration</h4> 
+        </div> 
+        <div class="card shadow-lg border-0 overflow-hidden"> 
+            <div class="card-header grad-dark text-white p-4"> 
+                <div class="d-flex justify-content-between align-items-center"> 
+                    <span>Active Coil: <strong>{{ coil.coil_number }}</strong></span> 
+                    <i class="fa-solid fa-sliders"></i> 
+                </div> 
+            </div> 
+            <div class="card-body p-4"> 
+                <form method="POST"> 
+                    <div class="mb-4"> 
+                        <label class="form-label text-uppercase small fw-bold text-muted">New / Current Coil ID</label> 
+                        <div class="input-group"> 
+                            <span class="input-group-text bg-white"><i class="fa-solid fa-barcode"></i></span> 
+                            <input type="text" class="form-control fw-bold" name="coil_number" value="{{ coil.coil_number }}"> 
+                        </div> 
+                    </div> 
+                    <div class="row g-3"> 
+                        <div class="col-md-6"> <label class="form-label text-muted small fw-bold">Total Length (m)</label> <input type="number" class="form-control" name="total_length" value="{{ coil.total_length }}"> </div> 
+                        <div class="col-md-6"> <label class="form-label text-muted small fw-bold">Density (g/m)</label> <input type="number" step="0.1" class="form-control" name="density" value="{{ coil.density }}"> </div> 
+                        <div class="col-md-6"> <label class="form-label text-muted small fw-bold">Target Recovery (%)</label> <input type="number" step="0.1" class="form-control" name="recovery_target" value="{{ coil.recovery_target }}"> </div> 
+                        <div class="col-md-6"> <label class="form-label text-muted small fw-bold">Target PPM</label> <input type="number" class="form-control" name="target_ppm" value="{{ coil.target_ppm }}"> </div> 
+                    </div> 
+                    <hr class="my-4"> 
+                    <button type="submit" class="btn btn-primary-custom w-100 py-3 fw-bold shadow"> <i class="fa-solid fa-floppy-disk me-2"></i> SAVE CONFIGURATION </button> 
+                </form> 
+            </div> 
+        </div> 
+    </div> 
+</div> 
+{% endblock %}
+        

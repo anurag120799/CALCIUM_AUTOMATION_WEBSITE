@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ca-Wire Automation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f3f5f9; font-family: 'Segoe UI', sans-serif; color: #2c3e50; }
+        .card { border: none; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.05); }
+
+        /* User Theme */
+        .user-nav { background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%); }
+        .btn-primary-custom { background-image: linear-gradient(135deg, #0f2027 0%, #2c5364 100%); border: none; color: white; padding: 12px; border-radius: 8px; }
+
+        /* Admin Theme */
+        .admin-nav { background: #212529; border-bottom: 1px solid #495057; }
+
+        /* Gradients */
+        .grad-heat { background: linear-gradient(135deg, #FF512F 0%, #DD2476 100%); color: white; }
+        .grad-chem { background: linear-gradient(135deg, #4776E6 0%, #8E54E9 100%); color: white; }
+        .grad-dark { background: linear-gradient(135deg, #232526 0%, #414345 100%); color: white; }
+    </style>
+</head>
+<body>
+    {% if current_user.is_authenticated %}
+        {% if current_user.role == 'admin' %}
+        <!-- ADMIN NAVBAR -->
+        <nav class="navbar navbar-expand-lg navbar-dark admin-nav mb-5">
+            <div class="container-fluid px-4">
+                <a class="navbar-brand fw-bold font-monospace" href="/admin">
+                    <i class="fa-solid fa-terminal me-2 text-danger"></i>ROOT<span class="text-secondary">_ACCESS</span>
+                </a>
+                <div class="collapse navbar-collapse">
+                    <div class="navbar-nav ms-auto gap-3">
+                        <span class="nav-item nav-link text-white-50"><small>SECURE SESSION</small></span>
+                        <a class="nav-link text-white fw-bold" href="/logout"><i class="fa-solid fa-power-off me-1"></i> Terminate</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        {% else %}
+        <!-- USER NAVBAR -->
+        <nav class="navbar navbar-expand-lg navbar-dark user-nav mb-5">
+            <div class="container">
+                <a class="navbar-brand" href="/">Ca-Wire<span style="color:#00f2fe"> System</span></a>
+                <div class="collapse navbar-collapse">
+                    <div class="navbar-nav ms-auto gap-3">
+                        <a class="nav-link text-white" href="{{ url_for('operator_dashboard') }}">Dashboard</a>
+                        <a class="nav-link text-white" href="{{ url_for('settings') }}">Settings</a>
+                        <a class="nav-link text-white" href="/history">History</a>
+                        <a class="nav-link text-warning" href="/subscription">Subscription</a>
+                        <a class="nav-link text-white" href="/logout">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        {% endif %}
+    {% endif %}
+
+    <div class="container pb-5">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} mb-4 shadow-sm">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
+        

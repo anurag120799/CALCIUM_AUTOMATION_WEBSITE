@@ -1,0 +1,149 @@
+
+{% extends "base.html" %}
+{% block content %}
+<style>
+    :root { --admin-primary: #4361ee; --admin-bg: #f8f9fa; }
+    .card-clean { border: 1px solid #e0e6ed; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); border-radius: 12px; background: white; }
+    .card-header-clean { background: transparent; border-bottom: 1px solid #f1f2f3; padding: 1.5rem; }
+    .avatar-initials { width: 40px; height: 40px; background: #e2e6ea; color: #495057; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; }
+    .status-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .dot-success { background-color: #1abc9c; box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.2); }
+    .dot-danger { background-color: #e7515a; box-shadow: 0 0 0 3px rgba(231, 81, 90, 0.2); }
+    .dot-warning { background-color: #e2a03f; }
+    .task-card { border-left: 4px solid var(--admin-primary); transition: 0.2s; }
+    .task-card:hover { transform: translateX(5px); }
+</style>
+
+<div class="row mb-4 align-items-end">
+    <div class="col">
+        <h6 class="text-uppercase text-muted small fw-bold ls-1">Administration</h6>
+        <h2 class="fw-bold text-dark">User Management</h2>
+    </div>
+    <div class="col-auto">
+        <span class="badge bg-white text-dark border py-2 px-3 shadow-sm">
+            <i class="fa-regular fa-calendar me-2"></i> {{ now.strftime('%B %d, %Y') }}
+        </span>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- LEFT: USER DIRECTORY -->
+    <div class="col-lg-8">
+        <div class="card-clean h-100">
+            <div class="card-header-clean d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold m-0 text-dark">User Directory <span class="text-muted fw-normal ms-2 fs-6">({{ all_users|length }} total)</span></h5>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-filter me-1"></i> Filter</button>
+                    <button class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-download me-1"></i> Export</button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0 table-hover">
+                    <thead class="bg-light text-secondary small">
+                        <tr>
+                            <th class="ps-4 py-3 border-0 rounded-start">User Profile</th>
+                            <th class="py-3 border-0">Role</th>
+                            <th class="py-3 border-0">Access Status</th>
+                            <th class="py-3 border-0 rounded-end text-end pe-4">Expiry</th>
+                        </tr>
+                    </thead>
+                    <tbody class="border-top-0">
+                        {% for user in all_users %}
+                        <tr>
+                            <td class="ps-4 py-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-initials me-3">{{ user.username[:2].upper() }}</div>
+                                    <div>
+                                        <div class="fw-bold text-dark">{{ user.username }}</div>
+                                        <div class="small text-muted">ID: #{{ user.id }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if user.role == 'admin' %}
+                                    <span class="badge bg-dark text-white shadow-sm">ADMIN</span>
+                                {% else %}
+                                    <span class="badge bg-light text-dark border">OPERATOR</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user.role == 'admin' %}
+                                    <span class="text-dark fw-bold small"><span class="status-dot dot-success"></span>Permanent</span>
+                                {% elif user.subscription_expiry and user.subscription_expiry > now %}
+                                    <span class="text-success fw-bold small"><span class="status-dot dot-success"></span>Active</span>
+                                {% else %}
+                                    <span class="text-danger fw-bold small"><span class="status-dot dot-danger"></span>Expired</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end pe-4 text-muted font-monospace small">
+                                {{ user.subscription_expiry.strftime('%Y-%m-%d') if user.subscription_expiry else '--' }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: ACTION PANEL & CONFIG -->
+    <div class="col-lg-4">
+
+        <!-- PENDING APPROVALS SECTION -->
+        <div class="mb-4">
+            <h6 class="fw-bold text-muted text-uppercase small mb-3">Action Queue <span class="badge bg-danger rounded-pill ms-1">{{ pending_users|length }}</span></h6>
+            {% if pending_users %}
+                {% for p_user in pending_users %}
+                <div class="card-clean task-card p-3 mb-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="fw-bold text-dark">{{ p_user.username }}</span>
+                        <span class="badge bg-warning text-dark">Pending</span>
+                    </div>
+                    <div class="bg-light p-2 rounded mb-3 small">
+                        <span class="text-muted d-block text-uppercase" style="font-size: 0.7rem;">Transaction ID / UTR</span>
+                        <span class="font-monospace fw-bold text-dark">{{ p_user.submitted_utr }}</span>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <form action="{{ url_for('admin_approve_payment') }}" method="POST">
+                                <input type="hidden" name="user_id" value="{{ p_user.id }}">
+                                <button type="submit" class="btn btn-primary w-100 btn-sm">Approve</button>
+                            </form>
+                        </div>
+                        <div class="col-6">
+                            <form action="{{ url_for('admin_reject_payment') }}" method="POST">
+                                <input type="hidden" name="user_id" value="{{ p_user.id }}">
+                                <button type="submit" class="btn btn-outline-danger w-100 btn-sm">Deny</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="card-clean p-4 text-center border-dashed">
+                    <i class="fa-solid fa-clipboard-check fa-2x text-muted mb-2"></i>
+                    <p class="text-muted small m-0">All tasks completed.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- QR CONFIG SECTION -->
+        <div>
+            <h6 class="fw-bold text-muted text-uppercase small mb-3">System Configuration</h6>
+            <div class="card-clean p-4">
+                <div class="text-center mb-3">
+                    <img src="{{ url_for('static', filename='uploads/upi_qr.png') }}?v={{ now.timestamp() }}" class="img-fluid rounded border p-1" style="width: 120px; height: 120px; object-fit: contain;">
+                    <div class="small text-muted mt-2">Active Payment QR</div>
+                </div>
+                <form action="{{ url_for('admin_upload_qr') }}" method="POST" enctype="multipart/form-data">
+                    <label class="form-label fw-bold small">Upload Replacement</label>
+                    <input type="file" name="file" class="form-control form-control-sm mb-3" required accept="image/*">
+                    <button type="submit" class="btn btn-dark w-100 btn-sm"><i class="fa-solid fa-cloud-arrow-up me-2"></i>Update System</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+        

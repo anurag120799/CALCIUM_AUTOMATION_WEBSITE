@@ -1,0 +1,30 @@
+
+{% extends "base.html" %} 
+{% block content %} 
+<div class="card shadow-sm"> 
+    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3"> 
+        <h5 class="m-0 fw-bold">Injection Logs</h5> 
+        <div class="d-flex gap-2"> 
+            <a href="{{ url_for('export_data') }}" class="btn btn-success btn-sm">Export Excel</a> 
+            <form action="{{ url_for('delete_history') }}" method="POST" onsubmit="return confirm('Delete all logs?');"> 
+                <button type="submit" class="btn btn-outline-danger btn-sm">Clear</button> 
+            </form> 
+        </div> 
+    </div> 
+    <div class="card-body p-0"> 
+        <div class="table-responsive"> 
+            <table class="table table-hover align-middle mb-0"> 
+                <thead class="bg-light"> <tr> <th class="ps-4">Time</th> <th>Heat ID</th> <th>LF</th> <th>Coil</th> <th>Tonnage</th> <th>Used (m)</th> </tr> </thead> 
+                <tbody> 
+                    {% for log in logs %} 
+                    <tr> <td class="ps-4">{{ log.timestamp.strftime('%m-%d %H:%M') }}</td> <td>{{ log.heat_id }}</td> <td>{{ log.lf_number }}</td> <td>{{ log.coil_number }}</td> <td>{{ log.heat_tonnage }}</td> <td>{{ "%.1f"|format(log.calculated_length) }}</td> </tr> 
+                    {% else %} 
+                    <tr><td colspan="6" class="text-center py-3">No history.</td></tr> 
+                    {% endfor %} 
+                </tbody> 
+            </table> 
+        </div> 
+    </div> 
+</div> 
+{% endblock %}
+        

@@ -1,0 +1,68 @@
+
+{% extends "base.html" %} 
+{% block content %} 
+<div class="row justify-content-center"> 
+    <div class="col-lg-5"> 
+        <div class="card border-0 shadow-lg text-center overflow-hidden"> 
+            <div class="card-header grad-dark p-4"> 
+                <h4 class="text-white m-0">Subscription Status</h4> 
+            </div> 
+            <div class="card-body p-0"> 
+                <div class="p-5 bg-white">
+                    {% if days_left > 0 %} 
+                        <!-- 1. ACTIVE PLAN -->
+                        <div class="mb-4"><i class="fa-solid fa-circle-check fa-5x text-success"></i></div>
+                        <h2 class="fw-bold text-dark">Active Plan</h2> 
+                        <p class="text-muted">Expires on: <span class="fw-bold">{{ expiry_date }}</span></p> 
+                        <div class="alert alert-success d-inline-block px-4 py-2 rounded-pill fw-bold">{{ days_left }} Days Remaining</div>
+                        <div class="mt-4">
+                            <a href="{{ url_for('operator_dashboard') }}" class="btn btn-dark btn-lg px-5 shadow">Go to Dashboard</a>
+                        </div>
+
+                    {% elif current_user.submitted_utr %}
+                        <!-- 2. PENDING APPROVAL -->
+                        <div class="mb-3"><i class="fa-solid fa-hourglass-half fa-4x text-warning pulse-btn"></i></div>
+                        <h3 class="fw-bold text-warning">Verification Pending</h3>
+                        <p class="text-muted mb-4">We are verifying your payment details.</p>
+
+                        <div class="bg-light p-3 rounded border d-inline-block text-start mb-3">
+                            <small class="text-uppercase text-muted fw-bold d-block mb-1">Submitted UTR / Ref ID</small>
+                            <div class="font-monospace fs-5 text-dark fw-bold">{{ current_user.submitted_utr }}</div>
+                        </div>
+                        <p class="small text-muted">Access will be restored immediately after admin approval.</p>
+                        <button class="btn btn-outline-secondary btn-sm" disabled>Waiting for Admin...</button>
+
+                    {% else %} 
+                        <!-- 3. EXPIRED / PAY NOW -->
+                        <div class="mb-3"><i class="fa-solid fa-triangle-exclamation fa-4x text-danger"></i></div>
+                        <h3 class="fw-bold text-danger">Plan Expired</h3> 
+                        <p class="text-muted mb-4">Renew now to access the calculator.</p>
+
+                        <div class="card bg-light border-0 rounded-4 text-start p-4 mt-3">
+                            <h6 class="fw-bold text-uppercase text-secondary mb-3 small ls-1">Step 1: Scan & Pay</h6>
+                            <div class="text-center bg-white p-3 rounded mb-3 border">
+                                <img src="{{ url_for('static', filename='uploads/upi_qr.png') }}?v={{ now.timestamp() }}" 
+                                     class="img-fluid" style="max-height: 200px;" 
+                                     alt="Admin has not uploaded a QR code yet">
+                                <p class="small text-muted mt-2">Scan with PhonePe / GPay / Paytm</p>
+                            </div>
+
+                            <h6 class="fw-bold text-uppercase text-secondary mb-3 small ls-1 mt-2">Step 2: Submit UTR for Verification</h6>
+                            <form action="{{ url_for('subscription') }}" method="POST">
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold">Enter UPI Reference ID / UTR</label>
+                                    <input type="text" name="utr" class="form-control" placeholder="e.g. 3245xxxxxxxx" required>
+                                </div>
+                                <button type="submit" class="btn btn-success w-100 py-3 fw-bold">
+                                    SUBMIT FOR APPROVAL <i class="fa-solid fa-paper-plane ms-2"></i>
+                                </button> 
+                            </form>
+                        </div>
+                    {% endif %} 
+                </div>
+            </div> 
+        </div> 
+    </div> 
+</div> 
+{% endblock %}
+        
